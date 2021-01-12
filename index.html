@@ -1,8 +1,29 @@
 <html>
     <head>
         <title>Github UI</title>
+        <script>
+            function enter() {
+                message('nothing');
+                message("nothing2");
+                message("nothing3");
+                message("nothing4");
+                message("nothing5");
+            }
+
+            function message(content) {
+                var output = document.getElementById('output');
+                var input = document.getElementById('input');
+                output.append('\n' + content)
+                output.appendChild(document.createElement('br'));
+                input.scrollIntoView();
+            }
+
+        </script>
     </head>
     <body>
-        <input type="text"/>
+        <div id="output"></div>
+        <form action="javascript:enter()">
+            <input id="input" type="text"/>
+        </form>
     </body>
 </html>
