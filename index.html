@@ -9,14 +9,13 @@
                 commandName.append(pieces[0]); // this won't accept tags
                 messageElement(commandName);
 
-                if (pieces.length === 0) {
-                    console.log('is this even possible?');
-                    commands.help();
-                } else if (!commands[pieces[0]]) {
+                const command = pieces.shift();
+
+                if (!commands[command]) {
                     message('unknown command');
                     commands.help();
                 } else {
-                    commands[pieces[0]](...pieces);
+                    commands[command](...pieces);
                 }
                 output.appendChild(document.createElement('br'));
             }
@@ -27,8 +26,9 @@
             }
 
             const commands = {
-                help(help, command) {
+                help(command) {
                     if (!!command) {
+                        message(`${command} parameters:`);
                         if (command in commands) {
                             for (parameter in commands[command].parameters){
                                 message(`${parameter}: ${commands[command].parameters[parameter]}`);
@@ -48,14 +48,14 @@
                     message('Is this website secure?');
                     message('Good question. This does not save any cookies, just local memory. It does not make any external requests other than those you specify. It is just a simple site; take a look for yourself.')
                 },
-                yell(yell, ...thingsToYell) {
+                yell(...thingsToYell) {
                     alert(thingsToYell);
                 },
             }
 
             // if only @decorators were supported
             commands.help.parameters = { 
-                command: 'the command to get help for',
+                command: 'the command to get parameter help for',
             }
             commands.yell.parameters = {
                 '...thingsToYell': 'The things you want yelled',
