@@ -55,10 +55,10 @@
                     message('requesting. Please wait...')
                     web(topicName, (response) => {
 
-                        message(`There are ${response.total_count} topics`);
-                        // for(repository in response.items) {
-
-                        // }
+                        message(`${response.items.length} of ${response.total_count} topics`);
+                        for(repository of response.items) {
+                            messageRepository(repository, '•');
+                        }
                     });
                 }
             }
@@ -78,28 +78,39 @@
                 input.select();
             }
 
+            function messageRepository(repository, prefix='') {
+                const a = document.createElement('a');
+                a.setAttribute('href', repository.html_url);
+                a.setAttribute('target', '_blank');
+                a.append(repository.name);
+                messageElement(a);
+                // message(`${prefix}${repository.name}`);
+            }
+
             function message(content) {
                 messageElement(document.createTextNode(content));
             }
 
             function error(content) {
+                message('Error:')
                 // maybe make this red
                 message(content);
             }
 
-            function web(message, response) { // this is not a good name. But I don't know what the signature will look like yet
+            function web(message, callback) { // this is not a good name. But I don't know what the signature will look like yet
                 const request = new XMLHttpRequest();
                 const url = `https://api.github.com/search/repositories?q=topic:${message}`;
                 request.open("GET", url);
                 request.onreadystatechange=(e)=>{
                     if(request.readyState === XMLHttpRequest.DONE) {
                         if (request.status === 0 || (request.status >= 200 && request.status < 400)) {
+                            let responseObject;
                             try {
-                                response(JSON.parse(request.responseText));
+                                responseObject = JSON.parse(request.responseText);
                             } catch {
-                                console.log('invalid json from webserver');
-                                response(request.responseText);
+                                error('invalid json from webserver');
                             }
+                            callback(responseObject);
                         } else {
                             error('There was a problem making the web request');
                         }
