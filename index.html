@@ -100,35 +100,31 @@
                 messageElement(element, br=false);
             }
 
-            function asyncRepositoryElement(repository, verbosity) {
-                const promise = new Promise((resolve, reject) => {
-                    const div = document.createElement('div');
-                    const a = document.createElement('a');
-                    a.setAttribute('href', repository.html_url);
-                    a.setAttribute('target', '_blank');
-                    a.append(repository.full_name);
-                    div.appendChild(a);
-                    div.append(' ');
-                    if (!verbosity) {
-                        const button = document.createElement('button');
-                        button.setAttribute('type', 'button');
-                        button.setAttribute('onclick', `setAndSend('repository ${repository.full_name}')`);
-                        button.innerText = 'verbose';
-                        div.append(button);
-                    }
-                    div.append(' ');
-                    div.append(repository.description);
-                    if (!!verbosity) {
-                        // const contributorsPromise = asyncGithubApi(repository.contributors_url);
-                        // await Promise.all([contributorsPromise]);
-                        message('Contributors:');
-                        messageElement(div, br=false);
-                        // });
-                    } else {
-                        resolve(div);
-                    }
-                });
-                return promise;
+            async function asyncRepositoryElement(repository, verbosity) {
+                const div = document.createElement('div');
+                const a = document.createElement('a');
+                a.setAttribute('href', repository.html_url);
+                a.setAttribute('target', '_blank');
+                a.append(repository.full_name);
+                div.appendChild(a);
+                div.append(' ');
+                if (!verbosity) {
+                    const button = document.createElement('button');
+                    button.setAttribute('type', 'button');
+                    button.setAttribute('onclick', `setAndSend('repository ${repository.full_name}')`);
+                    button.innerText = 'verbose';
+                    div.append(button);
+                }
+                div.append(' ');
+                div.append(repository.description);
+                if (!!verbosity) {
+                    // const contributorsPromise = asyncGithubApi(repository.contributors_url);
+                    // await Promise.all([contributorsPromise]);
+                    message('Contributors:');
+                    messageElement(div, br=false);
+                    // });
+                }
+                return div;
             }
 
             function message(content) {
