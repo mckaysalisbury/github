@@ -18,22 +18,47 @@
                 } else {
                     commands[pieces[0]](...pieces);
                 }
+                output.appendChild(document.createElement('br'));
+            }
+
+            function arguments(...arguments) {
+                target.arguments = arguments;
+                return target;
             }
 
             const commands = {
-                help() {
-                    message('Valid commands:')
-                    for (const command in commands) {
-                        message(command);
+                help(help, command) {
+                    if (!!command) {
+                        if (command in commands) {
+                            for (parameter in commands[command].parameters){
+                                message(`${parameter}: ${commands[command].parameters[parameter]}`);
+                            }
+                        } else {
+                            message('no help available for that command');
+                        }
+
+                    } else {
+                        message('Valid commands:')
+                        for (const command in commands) {
+                            message(command);
+                        }
                     }
                 },
                 security() {
                     message('Is this website secure?');
-                    message('Good question. This does not save any cookies, just local memory. It does not make any external requests. It is just a simple site; take a look for yourself.')
+                    message('Good question. This does not save any cookies, just local memory. It does not make any external requests other than those you specify. It is just a simple site; take a look for yourself.')
                 },
-                yell(...pieces) {
-                    alert(pieces);
+                yell(yell, ...thingsToYell) {
+                    alert(thingsToYell);
                 },
+            }
+
+            // if only @decorators were supported
+            commands.help.parameters = { 
+                command: 'the command to get help for',
+            }
+            commands.yell.parameters = {
+                '...thingsToYell': 'The things you want yelled',
             }
 
             function messageElement(element) {
