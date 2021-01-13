@@ -7,7 +7,7 @@
                 const pieces = input.value.split(' ');
 
                 const commandName = document.createElement('b');
-                commandName.append(input.value); // this won't emit tags
+                commandName.append(input.value); // Security note, this won't emit tags
                 messageElement(commandName);
 
                 const command = pieces.shift();
@@ -164,7 +164,7 @@
 
             function messageError(content) {
                 message('Error:')
-                // maybe make this red
+                // TODO: maybe make this red
                 message(content);
             }
 
