@@ -180,12 +180,12 @@
                 return new Promise((resolve, reject) => {
                     const url = new URL(href);
                     const request = new XMLHttpRequest();
+                    request.open("GET", url.href);
                     if (!!access_token) {
                         if (url.hostname === 'api.github.com') {
-                            url.searchParams.append('access_token', access_token);
+                            request.setRequestHeader('Authorization', `token ${access_token}`);
                         }
                     }
-                    request.open("GET", url.href);
                     request.setRequestHeader('Accept', 'application/vnd.github.mercy-preview+json');
                     request.onreadystatechange=(e)=>{
                         if(request.readyState === XMLHttpRequest.DONE) {
