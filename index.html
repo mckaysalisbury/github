@@ -50,16 +50,14 @@
                 //     message('Is this website secure?');
                 //     message('Good question. This does not save any cookies, just local memory. It does not make any external requests other than those you specify. It is just a simple site; take a look for yourself.')
                 // },
-                async topic(topicName, page=1) {
+                async topic(topicName, page=1, verbosity=null) {
                     if (!topicName) {
                         return commands.help('topic');
                     }
                     message('requesting. Please wait...');
-                    const topics = await asyncGithubTopicSearch(topicName, page);
-                    message(`Page ${page} of ${Math.ceil(topics.total_count/pageSize)} (total=${topics.total_count})`);
-                    for(const repository of topics.items) {
-                        await asyncMessageRepository(repository);
-                    }
+                    const repositories = await asyncGithubTopicSearch(topicName, page);
+                    message(`Page ${page} of ${Math.ceil(repositories.total_count/pageSize)} (total=${repositories.total_count})`);
+                    await Promise.all(repositories.items.map((repository) => asyncMessageRepository(repository, verbosity)));
                 },
                 async repository(repositoryName) {
                     if (!repositoryName) {
@@ -78,7 +76,7 @@
             commands.topic.parameters = {
                 topic: 'the topic you wish to search for',
                 '[page]': 'the page number you would like results for (default 1)',
-                // TODO: Add in a 'verbosity' parameter which will make the async requests for all of the repositories returned.
+                '[verbosity]': 'specifying this parameter will get the full repository for all repositories in the result.',
             }
             commands.repository.parameters = {
                 repositoryName: 'the full name of the repository to get details for',
@@ -104,7 +102,7 @@
             }
 
             function contributorElement(contributor) {
-                const div = document.createElement('div');
+                // const div = document.createElement('div');
                 const a = document.createElement('a');
                 a.setAttribute('href', contributor.html_url);
                 a.setAttribute('target', '_blank');
@@ -114,8 +112,8 @@
                 a.appendChild(img)
                 a.append(' ');
                 a.append(contributor.login);
-                div.appendChild(a);
-                return div;
+                // div.appendChild(a);
+                return a;
             }
 
             async function asyncRepositoryElement(repository, verbosity) {
