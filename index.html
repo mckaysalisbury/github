@@ -3,11 +3,11 @@
         <title>Github UI</title>
         <script>
             const pageSize = 10;
-            function enter() {
+            function processInput() {
                 const pieces = input.value.split(' ');
 
                 const commandName = document.createElement('b');
-                commandName.append(pieces[0]); // this won't emit tags
+                commandName.append(input.value); // this won't emit tags
                 messageElement(commandName);
 
                 const command = pieces.shift();
@@ -19,11 +19,6 @@
                     commands[command](...pieces);
                 }
                 output.appendChild(document.createElement('br'));
-            }
-
-            function arguments(...arguments) {
-                target.arguments = arguments;
-                return target;
             }
 
             const commands = {
@@ -53,14 +48,23 @@
                     if (!topicName) {
                         return commands.help('topic');
                     }
-                    message('requesting. Please wait...')
-                    web(topicName, page, (response) => {
+                    message('requesting. Please wait...');
+                    githubTopics(topicName, page, (response) => {
 
                         message(`Page ${page} of ${Math.ceil(response.total_count/pageSize)} (total=${response.total_count})`);
                         for(repository of response.items) {
                             messageRepository(repository);
                         }
                         message('');
+                    });
+                },
+                repository(repositoryName) {
+                    if (!repositoryName) {
+                        return commands.help('repository');
+                    }
+                    message('requesting. Please wait...')
+                    githubRepository(repositoryName, (response) => {
+                        messageRepository(response, "verbose");
                     });
                 },
             }
@@ -73,20 +77,51 @@
                 topic: 'the topic you wish to search for',
                 '[page]': 'the page number you would like results for (default 1)',
             }
+            commands.repository.parameters = {
+                repositoryName: 'the full name of the repository to get details for',
+            }
 
-            function messageElement(element) {
+            function setAndSend(command) {
+                input.value = command;
+                processInput();
+            }
+
+            function messageElement(element, br=true) {
                 output.appendChild(element);
-                output.appendChild(document.createElement('br'));
+                if (br) {
+                    output.appendChild(document.createElement('br'));
+                }
                 input.scrollIntoView();
                 input.select();
             }
 
-            function messageRepository(repository) {
+            function messageRepository(repository, verbosity) {
+                const div = document.createElement('div');
                 const a = document.createElement('a');
                 a.setAttribute('href', repository.html_url);
                 a.setAttribute('target', '_blank');
                 a.append(repository.full_name);
-                messageElement(a);
+                div.appendChild(a);
+                div.append(' ');
+                if (!verbosity) {
+                    const button = document.createElement('button');
+                    button.setAttribute('type', 'button');
+                    button.setAttribute('onclick', `setAndSend('repository ${repository.full_name}')`);
+                    button.innerText = 'verbose';
+                    div.append(button);
+                }
+                div.append(' ');
+                div.append(repository.description);
+                if (!!verbosity) {
+                    // Hmm, maybe I should convert this to Promise style, instead of chaining for efficiency
+
+                    { // in the callback
+                        messageElement(div, br=false);
+                    }
+                } else {
+                    // the callback will call this in verbosity mode
+                    messageElement(div, br=false);
+                }
             }
 
             function message(content) {
@@ -99,9 +134,8 @@
                 message(content);
             }
 
-            function web(message, page, callback) { // this is not a good name. But I don't know what the signature will look like yet
+            function githubApi(url, callback) {
                 const request = new XMLHttpRequest();
-                const url = `https://api.github.com/search/repositories?per_page=${pageSize}&page=${page}&q=topic:${message}`;
                 console.log(url);
                 request.open("GET", url);
                 request.setRequestHeader('Accept', 'application/vnd.github.v3+json');
@@ -112,7 +146,7 @@
                             try {
                                 responseObject = JSON.parse(request.responseText);
                             } catch {
-                                error('invalid json from webserver');
+                                error('invalid json from github API');
                             }
                             callback(responseObject);
                         } else {
@@ -124,12 +158,20 @@
                 request.send();
             }
 
+            function githubTopics(message, page, callback) {
+                githubApi(`https://api.github.com/search/repositories?per_page=${pageSize}&page=${page}&q=topic:${message}`, callback);
+            }
+
+            function githubRepository(repositoryName, callback) {
+                githubApi(`https://api.github.com/repos/${repositoryName}`, callback);
+            }
+
         </script>
     </head>
     <body>
         <div id="output"></div>
-        <form action="javascript:enter()">
-            <input id="input" type="text" value="help"/>
+        <form action="javascript:processInput()">
+            <input id="input" type="text" value="help" autocomplete="off"/>
         </form>
     </body>
     <script>
