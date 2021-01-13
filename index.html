@@ -44,10 +44,11 @@
                         }
                     }
                 },
-                async security() {
-                    message('Is this website secure?');
-                    message('Good question. This does not save any cookies, just local memory. It does not make any external requests other than those you specify. It is just a simple site; take a look for yourself.')
-                },
+                // async security() {
+                // TODO: Add this back in when needed for authentication.
+                //     message('Is this website secure?');
+                //     message('Good question. This does not save any cookies, just local memory. It does not make any external requests other than those you specify. It is just a simple site; take a look for yourself.')
+                // },
                 async topic(topicName, page=1) {
                     if (!topicName) {
                         return commands.help('topic');
@@ -76,6 +77,7 @@
             commands.topic.parameters = {
                 topic: 'the topic you wish to search for',
                 '[page]': 'the page number you would like results for (default 1)',
+                // TODO: Add in a 'verbosity' parameter which will make the async requests for all of the repositories returned.
             }
             commands.repository.parameters = {
                 repositoryName: 'the full name of the repository to get details for',

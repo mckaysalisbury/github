@@ -5,6 +5,10 @@ This is a simple page to try connecting to the github api.
 
 Currently hosted at https://github.mckaysalisbury.com/github/
 
+# Using
+
+I'd like to think that, though spartan, the UI is self explanatory.
+
 # Run it for yourself
 
 1. Download: clone the repo, or copy the `index.html` file.
