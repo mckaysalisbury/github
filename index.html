@@ -12,7 +12,10 @@
                     message('unknown command');
                     commands.help();
                 } else {
-                    commands[pieces]();
+                    const commandName = document.createElement('b');
+                    commandName.append(pieces[0]);
+                    messageElement(commandName);
+                    commands[pieces[0]](pieces);
                 }
             }
 
@@ -28,6 +31,10 @@
                 },
             }
 
+            function messageElement(element) {
+                output.appendChild(element);
+                message('');
+            }
 
             function message(content) {
                 output.append('\n' + content)
