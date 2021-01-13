@@ -3,27 +3,48 @@
         <title>Github UI</title>
         <script>
             function enter() {
-                message('nothing');
-                message("nothing2");
-                message("nothing3");
-                message("nothing4");
-                message("nothing5");
+                const pieces = input.value.split(' ');
+                console.log('begin')
+                if (pieces.length === 0) {
+                    console.log('is this even possible?');
+                    commands.help();
+                } else if (!commands[pieces[0]]) {
+                    message('unknown command');
+                    commands.help();
+                } else {
+                    commands[pieces]();
+                }
             }
 
+            const commands = {
+                help() {
+                    message('Valid commands:')
+                    for (const command in commands) {
+                        message(command);
+                    }
+                },
+                yell() {
+                    alert('yelling');
+                },
+            }
+
+
             function message(content) {
-                var output = document.getElementById('output');
-                var input = document.getElementById('input');
                 output.append('\n' + content)
                 output.appendChild(document.createElement('br'));
                 input.scrollIntoView();
             }
-
         </script>
     </head>
     <body>
         <div id="output"></div>
         <form action="javascript:enter()">
-            <input id="input" type="text"/>
+            <input id="input" type="text" value="help"/>
         </form>
     </body>
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        input.focus();
+    </script>
 </html>
