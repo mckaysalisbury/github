@@ -6,7 +6,7 @@
                 const pieces = input.value.split(' ');
 
                 const commandName = document.createElement('b');
-                commandName.append(pieces[0]); // this won't accept tags
+                commandName.append(pieces[0]); // this won't emit tags
                 messageElement(commandName);
 
                 const command = pieces.shift();
@@ -28,10 +28,10 @@
             const commands = {
                 help(command) {
                     if (!!command) {
-                        message(`${command} parameters:`);
+                        message(`<${command}> parameters:`);
                         if (command in commands) {
                             for (parameter in commands[command].parameters){
-                                message(`${parameter}: ${commands[command].parameters[parameter]}`);
+                                message(`• ${parameter}: ${commands[command].parameters[parameter]}`);
                             }
                         } else {
                             message('no help available for that command');
@@ -48,30 +48,66 @@
                     message('Is this website secure?');
                     message('Good question. This does not save any cookies, just local memory. It does not make any external requests other than those you specify. It is just a simple site; take a look for yourself.')
                 },
-                yell(...thingsToYell) {
-                    alert(thingsToYell);
-                },
+                topic(topicName) {
+                    if (!topicName) {
+                        return commands.help('topic');
+                    }
+                    message('requesting. Please wait...')
+                    web(topicName, (response) => {
+
+                        message(`There are ${response.total_count} topics`);
+                        // for(repository in response.items) {
+
+                        // }
+                    });
+                }
             }
 
             // if only @decorators were supported
             commands.help.parameters = { 
                 command: 'the command to get parameter help for',
             }
-            commands.yell.parameters = {
-                '...thingsToYell': 'The things you want yelled',
+            commands.topic.parameters = {
+                topic: 'the topic you wish to search for',
             }
 
             function messageElement(element) {
                 output.appendChild(element);
-                message('');
-            }
-
-            function message(content) {
-                output.append('\n' + content)
                 output.appendChild(document.createElement('br'));
                 input.scrollIntoView();
                 input.select();
             }
+
+            function message(content) {
+                messageElement(document.createTextNode(content));
+            }
+
+            function error(content) {
+                // maybe make this red
+                message(content);
+            }
+
+            function web(message, response) { // this is not a good name. But I don't know what the signature will look like yet
+                const request = new XMLHttpRequest();
+                const url = `https://api.github.com/search/repositories?q=topic:${message}`;
+                request.open("GET", url);
+                request.onreadystatechange=(e)=>{
+                    if(request.readyState === XMLHttpRequest.DONE) {
+                        if (request.status === 0 || (request.status >= 200 && request.status < 400)) {
+                            try {
+                                response(JSON.parse(request.responseText));
+                            } catch {
+                                console.log('invalid json from webserver');
+                                response(request.responseText);
+                            }
+                        } else {
+                            error('There was a problem making the web request');
+                        }
+                    }
+                }
+                request.send();
+            }
+
         </script>
     </head>
     <body>
