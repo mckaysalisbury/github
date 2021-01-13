@@ -3,6 +3,7 @@
         <title>Github UI</title>
         <script>
             const pageSize = 10;
+            let access_token = new URLSearchParams(window.location.search).get('access_token');
             async function processInput() {
                 const pieces = input.value.split(' ');
 
@@ -45,14 +46,13 @@
                         }
                     }
                 },
-                // async security() {
-                // TODO: Add this back in when needed for authentication.
-                //     message('Is this website secure?');
-                //     message('Good question. This does not save any cookies, just local memory. It does not make any external requests other than those you specify. It is just a simple site; take a look for yourself.')
-                // },
+                async security() {
+                    message('Is this website secure?');
+                    message('Good question. This does not save any cookies, just local memory. It does not send the access token to anywhere but github. It is a simple site; take a look for yourself.')
+                },
                 async topic(topicName, page=1, verbosity=null) {
                     if (!topicName) {
-                        return commands.help('topic');
+                        return await commands.help('topic');
                     }
                     message('requesting. Please wait...');
                     const repositories = await asyncGithubTopicSearch(topicName, page);
@@ -61,12 +61,18 @@
                 },
                 async repository(repositoryName) {
                     if (!repositoryName) {
-                        return commands.help('repository');
+                        return await commands.help('repository');
                     }
                     message('requesting. Please wait...')
                     const repository = await asyncGithubRepository(repositoryName);
                     await asyncMessageRepository(repository, "verbose");
                 },
+                async access_token(token) {
+                    if (!token) {
+                        return await commands.help('access_token');
+                    }
+                    access_token = token;
+                }
             }
 
             // if only @decorators were supported
@@ -80,6 +86,9 @@
             }
             commands.repository.parameters = {
                 repositoryName: 'the full name of the repository to get details for',
+            }
+            commands.access_token.parameters = {
+                access_token: 'the github access token (https://github.com/settings/tokens requires "repo" access) for private repositories. Can also be set in the url `?access_token=0123456789abcdef`'
             }
 
             function setAndSend(command) {
@@ -167,10 +176,16 @@
                 message(content);
             }
 
-            function asyncGithub(url) {
+            function asyncGithub(href) {
                 return new Promise((resolve, reject) => {
+                    const url = new URL(href);
                     const request = new XMLHttpRequest();
-                    request.open("GET", url);
+                    if (!!access_token) {
+                        if (url.hostname === 'api.github.com') {
+                            url.searchParams.append('access_token', access_token);
+                        }
+                    }
+                    request.open("GET", url.href);
                     request.setRequestHeader('Accept', 'application/vnd.github.mercy-preview+json');
                     request.onreadystatechange=(e)=>{
                         if(request.readyState === XMLHttpRequest.DONE) {
