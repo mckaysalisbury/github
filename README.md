@@ -1,6 +1,7 @@
 This is a simple page to try connecting to the github api.
 
 * This uses the very modern framework of "Javascript in a stadards-compliant browser"
+* The code is mostly self-documenting.
 
 Currently hosted at https://github.mckaysalisbury.com/github/
 
